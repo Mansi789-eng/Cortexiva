@@ -1,8 +1,48 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Pastel Cyan/Blue Tech Palette */
+  --background: #f8fbfd;
+  --foreground: #1e3a5f;
+
+  /* Pastel Accent Colors - Soft Cyan/Blue spectrum */
+  --accent-primary: #5ba4c9;
+  --accent-primary-hover: #4a93b8;
+  --accent-secondary: #7ec4e0;
+  --accent-tertiary: #a8dae9;
+  --accent-light: #c5e8f2;
+  --accent-subtle: #e8f4f9;
+
+  /* Pastel Blue variations */
+  --blue-600: #4a8fb5;
+  --blue-500: #6db3d4;
+  --blue-400: #96cce3;
+  --blue-100: #e0f0f7;
+
+  /* UI Colors - Warmer, softer */
+  --sidebar-bg: #f0f6f9;
+  --sidebar-hover: #e4eff5;
+  --sidebar-active: #d6eaf3;
+  --card-bg: #ffffff;
+  --card-border: #d9e8f0;
+
+  /* Text Colors - Softer contrast */
+  --text-primary: #1e3a5f;
+  --text-secondary: #4a6a8a;
+  --text-muted: #7a9ab5;
+  --text-light: #a4bdd0;
+
+  /* Pastel Status Colors */
+  --success: #6bc4a6;
+  --success-light: #e0f5ee;
+  --warning: #e8b86d;
+  --warning-light: #fdf4e4;
+  --error: #e08a8a;
+  --error-light: #fce8e8;
+
+  /* Soft Gradients */
+  --gradient-primary: linear-gradient(135deg, #7ec4e0 0%, #a8dae9 100%);
+  --gradient-subtle: linear-gradient(135deg, #f0f8fb 0%, #e8f4f9 100%);
 }
 
 @theme inline {
@@ -10,17 +50,67 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Accent colors */
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-primary-hover: var(--accent-primary-hover);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-accent-tertiary: var(--accent-tertiary);
+  --color-accent-light: var(--accent-light);
+  --color-accent-subtle: var(--accent-subtle);
+
+  /* Blue spectrum */
+  --color-blue-600: var(--blue-600);
+  --color-blue-500: var(--blue-500);
+  --color-blue-400: var(--blue-400);
+  --color-blue-100: var(--blue-100);
+
+  /* UI colors */
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-card-bg: var(--card-bg);
+  --color-card-border: var(--card-border);
+
+  /* Text colors */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-light: var(--text-light);
+
+  /* Status colors */
+  --color-success: var(--success);
+  --color-success-light: var(--success-light);
+  --color-warning: var(--warning);
+  --color-warning-light: var(--warning-light);
+  --color-error: var(--error);
+  --color-error-light: var(--error-light);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 150ms;
+  transition-timing-function: ease-in-out;
+}
+
+/* Soft glass morphism effects */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(217, 232, 240, 0.8);
+}
+
+.glass-header {
+  background: rgba(248, 251, 253, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--card-border);
 }
