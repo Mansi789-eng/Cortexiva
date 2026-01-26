@@ -1,5 +1,7 @@
 import { GoogleGenerativeAI, Part } from '@google/generative-ai';
 import { VertexAI } from '@google-cloud/vertexai';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // ============================================
 // Configuration
@@ -15,6 +17,32 @@ const VERTEX_LOCATION = process.env.VERTEX_LOCATION || 'europe-west4'; // Nether
 // Model names
 export const DOCUMENT_MODEL = 'gemini-2.0-flash';
 export const CHAT_MODEL = 'gemini-2.0-flash';
+
+// ============================================
+// Vercel Credentials Setup
+// ============================================
+
+// For Vercel: Write JSON credentials to temp file if provided as env var
+function setupVertexCredentials(): void {
+  const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
+
+  if (credentialsJson && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    try {
+      // Write credentials to /tmp (Vercel's writable directory)
+      const credentialsPath = path.join('/tmp', 'gcp-credentials.json');
+      fs.writeFileSync(credentialsPath, credentialsJson);
+      process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
+      console.log('[Gemini] Vertex AI credentials configured from JSON env var');
+    } catch (error) {
+      console.error('[Gemini] Failed to write credentials file:', error);
+    }
+  }
+}
+
+// Setup credentials before initializing Vertex AI
+if (USE_VERTEX_AI) {
+  setupVertexCredentials();
+}
 
 // ============================================
 // Provider Initialization
