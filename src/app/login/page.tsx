@@ -51,21 +51,18 @@ function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-md animate-fade-in">
       {/* Logo/Brand */}
       <div className="text-center mb-8">
-        <Link href="/" className="inline-flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
-            <span className="text-white font-bold text-lg">C</span>
-          </div>
-          <span className="text-xl font-semibold text-[var(--text-primary)]">Cortexiva</span>
+        <Link href="/homepage" className="inline-flex items-center">
+          <span className="text-3xl font-bold gradient-text">Cortexiva</span>
         </Link>
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)] mt-6">Welcome back</h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-2">Sign in to your account to continue</p>
+        <h1 className="text-2xl font-semibold text-dark mt-6">Welcome back</h1>
+        <p className="text-sm text-gray-500 mt-2">Sign in to your account to continue</p>
       </div>
 
       {/* Login Card */}
-      <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-8">
+      <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-xl">
         {/* Error Message */}
         {error && (
           <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
@@ -76,7 +73,7 @@ function LoginForm() {
         {/* Google Login */}
         <button
           onClick={handleGoogleLogin}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-[var(--card-border)] bg-white hover:bg-gray-50 transition-colors text-[var(--text-primary)] font-medium"
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors text-dark font-medium"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -101,15 +98,15 @@ function LoginForm() {
 
         {/* Divider */}
         <div className="flex items-center gap-4 my-6">
-          <div className="flex-1 h-px bg-[var(--card-border)]" />
-          <span className="text-sm text-[var(--text-muted)]">or</span>
-          <div className="flex-1 h-px bg-[var(--card-border)]" />
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-sm text-gray-400">or</span>
+          <div className="flex-1 h-px bg-gray-200" />
         </div>
 
         {/* Email Login Form */}
         <form onSubmit={handleEmailLogin} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+            <label htmlFor="email" className="block text-sm font-medium text-dark mb-2">
               Email
             </label>
             <input
@@ -119,12 +116,12 @@ function LoginForm() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@company.com"
               required
-              className="w-full px-4 py-3 rounded-xl border border-[var(--card-border)] bg-[var(--background)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-subtle)] transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-dark placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-dark mb-2">
               Password
             </label>
             <input
@@ -134,14 +131,14 @@ function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full px-4 py-3 rounded-xl border border-[var(--card-border)] bg-[var(--background)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-subtle)] transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-dark placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-4 py-3 rounded-xl bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-primary w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
@@ -149,21 +146,21 @@ function LoginForm() {
       </div>
 
       {/* Sign up link */}
-      <p className="text-center text-sm text-[var(--text-secondary)] mt-6">
+      <p className="text-center text-sm text-gray-500 mt-6">
         Don&apos;t have an account?{' '}
         <Link
           href={`/signup${redirectTo !== '/create-bot-dashboard' ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`}
-          className="text-[var(--accent-primary)] hover:underline font-medium"
+          className="text-primary hover:underline font-medium"
         >
           Sign up
         </Link>
       </p>
 
       {/* Forgot password link */}
-      <p className="text-center text-sm text-[var(--text-secondary)] mt-2">
+      <p className="text-center text-sm text-gray-500 mt-2">
         <Link
           href="/forgot-password"
-          className="text-[var(--accent-primary)] hover:underline font-medium"
+          className="text-primary hover:underline font-medium"
         >
           Forgot your password?
         </Link>
@@ -195,7 +192,13 @@ function LoginFallback() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center p-4">
+      {/* Background decoration */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+      </div>
+
       <Suspense fallback={<LoginFallback />}>
         <LoginForm />
       </Suspense>

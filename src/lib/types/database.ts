@@ -17,6 +17,10 @@ export interface Database {
           avatar_url: string | null;
           tier: 'free' | 'plus';
           stripe_customer_id: string | null;
+          starter_paid: boolean;
+          stripe_subscription_id: string | null;
+          plus_bots: number;
+          plus_seats: number;
           created_at: string;
           updated_at: string;
         };
@@ -27,6 +31,10 @@ export interface Database {
           avatar_url?: string | null;
           tier?: 'free' | 'plus';
           stripe_customer_id?: string | null;
+          starter_paid?: boolean;
+          stripe_subscription_id?: string | null;
+          plus_bots?: number;
+          plus_seats?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -37,6 +45,10 @@ export interface Database {
           avatar_url?: string | null;
           tier?: 'free' | 'plus';
           stripe_customer_id?: string | null;
+          starter_paid?: boolean;
+          stripe_subscription_id?: string | null;
+          plus_bots?: number;
+          plus_seats?: number;
           created_at?: string;
           updated_at?: string;
         };

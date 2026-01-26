@@ -1,0 +1,408 @@
+<!--
+DOCUMENTATION: Cortexiva - Technical Documentation
+
+This HTML document serves as comprehensive technical documentation for the Cortexiva platform,
+a B2B SaaS application for creating AI-powered knowledge bots.
+
+DOCUMENT STRUCTURE:
+- Executive Summary: Platform overview and key features
+- Technology Stack: Complete tech specifications (Next.js, Supabase, Google Gemini, etc.)
+- System Architecture: High-level design and data flow diagrams
+- Database Schema: PostgreSQL table definitions and structure
+- API Routes: RESTful endpoints for bot management and chat functionality
+- Key Components: Core modules (document processing, retrieval system, AI integration)
+- Frontend Pages: Application routes and UI pages
+- Security & Compliance: Authentication, authorization, and GDPR compliance
+- Environment Configuration: Required variables for deployment
+- Deployment Instructions: Setup and build procedures
+- Cost Analysis: Infrastructure and unit economics
+- Roadmap: Future feature plans
+
+KEY TECHNOLOGIES:
+- Frontend: Next.js 16.1 with TypeScript and Tailwind CSS 4.0
+- Backend: API Routes with Node.js
+- Database: Supabase (PostgreSQL) with Row Level Security
+- AI/ML: Google Gemini 2.0 Flash (with Vertex AI EU option)
+- Storage: Supabase Storage for file uploads
+- Payments: Stripe (planned integration)
+- Hosting: Vercel (planned deployment)
+
+STYLING NOTES:
+- Professional color scheme: Sky blue (#0ea5e9) primary, Dark blue (#1e3a5f) secondary
+- Responsive layout: max-width 800px centered container
+- Semantic styling: highlights, warnings, tables, code blocks with proper formatting
+- Accessible typography: Calibri/Arial with 1.6 line-height
+
+COMPLIANCE FEATURES:
+- EU Data Residency: Frankfurt database, Netherlands AI processing
+- GDPR Compliance: User data isolation with RLS policies
+- Multi-tier Access: Free (Starter) and Plus plans with feature limits
+- Security: Email/password and OAuth authentication via Supabase
+
+PRICING MODEL:
+- Free Tier: 1 bot, 3 knowledge sources, 50 lifetime chats
+- Plus Tier: EUR 5/bot, EUR 2/seat, unlimited bots/seats, 20 sources per bot, 1k chats/seat/month
+-->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Cortexiva - Technical Documentation</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+    h1 { color: #0ea5e9; border-bottom: 3px solid #0ea5e9; padding-bottom: 10px; }
+    h2 { color: #1e3a5f; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-top: 30px; }
+    h3 { color: #4a6a8a; }
+    code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-family: Consolas, monospace; }
+    pre { background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background: #0ea5e9; color: white; }
+    tr:nth-child(even) { background: #f9f9f9; }
+    .highlight { background: #e8f4f9; padding: 15px; border-left: 4px solid #0ea5e9; margin: 15px 0; }
+    .warning { background: #fdf4e4; padding: 15px; border-left: 4px solid #e8b86d; margin: 15px 0; }
+    ul { margin: 10px 0; }
+    li { margin: 5px 0; }
+  </style>
+</head>
+<body>
+
+<h1>Cortexiva - Technical Documentation</h1>
+<p><strong>Version:</strong> 1.0<br>
+<strong>Date:</strong> January 2025<br>
+<strong>Author:</strong> Cortexiva Team</p>
+
+<h2>1. Executive Summary</h2>
+<p>Cortexiva is a B2B SaaS platform that enables organizations to create AI-powered knowledge bots. Users can upload documents (PDFs, DOCX, images), URLs, or text content, and the platform creates an intelligent chatbot that can answer questions based on this knowledge base.</p>
+
+<div class="highlight">
+<strong>Key Value Proposition:</strong> "Knowledge bots that stay fresh. Built for teams who hate outdated docs."
+</div>
+
+<h3>Core Features</h3>
+<ul>
+  <li><strong>Multi-format Document Support:</strong> PDF, DOCX, images, URLs, plain text</li>
+  <li><strong>AI-Powered Chat:</strong> Context-aware responses using Google Gemini</li>
+  <li><strong>Tree-based Indexing:</strong> Efficient document retrieval without expensive embeddings</li>
+  <li><strong>EU Data Residency:</strong> GDPR-compliant with Vertex AI integration</li>
+  <li><strong>Tiered Pricing:</strong> Free (Starter) and Plus plans</li>
+</ul>
+
+<h2>2. Technology Stack</h2>
+
+<table>
+  <tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr>
+  <tr><td>Frontend</td><td>Next.js 16.1 (App Router)</td><td>React framework with SSR</td></tr>
+  <tr><td>Styling</td><td>Tailwind CSS 4.0</td><td>Utility-first CSS</td></tr>
+  <tr><td>Language</td><td>TypeScript</td><td>Type safety</td></tr>
+  <tr><td>Database</td><td>Supabase (PostgreSQL)</td><td>Data storage + Auth</td></tr>
+  <tr><td>Storage</td><td>Supabase Storage</td><td>File uploads</td></tr>
+  <tr><td>AI Model</td><td>Google Gemini 2.0 Flash</td><td>Document extraction + Chat</td></tr>
+  <tr><td>AI Provider</td><td>Google AI / Vertex AI</td><td>Toggle for EU compliance</td></tr>
+  <tr><td>Payments</td><td>Stripe (planned)</td><td>Subscription billing</td></tr>
+  <tr><td>Hosting</td><td>Vercel (planned)</td><td>Edge deployment</td></tr>
+</table>
+
+<h2>3. System Architecture</h2>
+
+<h3>3.1 High-Level Architecture</h3>
+<pre>
++------------------+     +------------------+     +------------------+
+|                  |     |                  |     |                  |
+|   Next.js App    |---->|   Supabase       |     |   Google AI      |
+|   (Frontend +    |     |   (Database +    |     |   (Gemini /      |
+|    API Routes)   |     |    Storage +     |     |    Vertex AI)    |
+|                  |     |    Auth)         |     |                  |
++------------------+     +------------------+     +------------------+
+         |                        |                        |
+         |                        |                        |
+         v                        v                        v
++------------------------------------------------------------------+
+|                         EU Data Residency                         |
+|  Database: Frankfurt | AI: Netherlands | API: Amsterdam           |
++------------------------------------------------------------------+
+</pre>
+
+<h3>3.2 Data Flow</h3>
+<ol>
+  <li><strong>Document Upload:</strong> User uploads file → Supabase Storage → Gemini extracts text → Tree index created → Stored in knowledge_sources</li>
+  <li><strong>Chat Query:</strong> User asks question → Tree retriever finds relevant sections → Gemini generates response with context → Response returned</li>
+</ol>
+
+<h2>4. Database Schema</h2>
+
+<h3>4.1 Tables Overview</h3>
+
+<table>
+  <tr><th>Table</th><th>Purpose</th><th>Key Fields</th></tr>
+  <tr><td>profiles</td><td>User accounts</td><td>id, email, tier, stripe_customer_id</td></tr>
+  <tr><td>bots</td><td>Knowledge bots</td><td>id, user_id, name, department, config, status</td></tr>
+  <tr><td>knowledge_sources</td><td>Uploaded documents</td><td>id, bot_id, type, name, tree_index, status</td></tr>
+  <tr><td>chats</td><td>Conversation history</td><td>id, bot_id, session_id, messages</td></tr>
+  <tr><td>embeddings</td><td>Vector embeddings (legacy)</td><td>id, bot_id, content, embedding</td></tr>
+</table>
+
+<h3>4.2 Profiles Table</h3>
+<pre>
+CREATE TABLE profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id),
+  email TEXT NOT NULL,
+  full_name TEXT,
+  avatar_url TEXT,
+  tier TEXT DEFAULT 'free' CHECK (tier IN ('free', 'plus')),
+  stripe_customer_id TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+</pre>
+
+<h3>4.3 Bots Table</h3>
+<pre>
+CREATE TABLE bots (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  department TEXT NOT NULL,
+  description TEXT,
+  config JSONB NOT NULL,
+  status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'active', 'paused')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+</pre>
+
+<h3>4.4 Bot Configuration (JSONB)</h3>
+<pre>
+{
+  "systemPrompt": "",
+  "tone": "professional" | "friendly" | "casual" | "concise",
+  "welcomeMessage": "Hello! How can I help you today?",
+  "confidenceThreshold": 70,
+  "fallbackMessage": "I'm not sure about that...",
+  "enableFollowUp": true,
+  "suggestRelated": true,
+  "temperature": 0.7,
+  "maxTokens": 500,
+  "memorySize": 5,
+  "visibility": "public" | "private" | "domain",
+  "allowedDomain": ""
+}
+</pre>
+
+<h2>5. API Routes</h2>
+
+<table>
+  <tr><th>Method</th><th>Endpoint</th><th>Purpose</th><th>Auth Required</th></tr>
+  <tr><td>POST</td><td>/api/bots</td><td>Create new bot</td><td>Yes</td></tr>
+  <tr><td>GET</td><td>/api/bots</td><td>List user's bots</td><td>Yes</td></tr>
+  <tr><td>GET</td><td>/api/bots/[id]</td><td>Get bot details</td><td>Yes</td></tr>
+  <tr><td>PUT</td><td>/api/bots/[id]</td><td>Update bot</td><td>Yes</td></tr>
+  <tr><td>DELETE</td><td>/api/bots/[id]</td><td>Delete bot</td><td>Yes</td></tr>
+  <tr><td>POST</td><td>/api/bots/[id]/knowledge</td><td>Add knowledge source</td><td>Yes</td></tr>
+  <tr><td>GET</td><td>/api/bots/[id]/knowledge</td><td>List knowledge sources</td><td>Yes</td></tr>
+  <tr><td>DELETE</td><td>/api/bots/[id]/knowledge/[sourceId]</td><td>Delete knowledge source</td><td>Yes</td></tr>
+  <tr><td>POST</td><td>/api/bots/[id]/chat</td><td>Send chat message</td><td>Optional</td></tr>
+  <tr><td>GET</td><td>/api/bots/[id]/chat</td><td>Get chat history</td><td>Optional</td></tr>
+  <tr><td>GET</td><td>/api/bots/[id]/public</td><td>Get public bot info</td><td>No</td></tr>
+</table>
+
+<h2>6. Key Components</h2>
+
+<h3>6.1 Document Processing Pipeline</h3>
+<p><strong>File:</strong> <code>src/lib/knowledge/tree-indexer.ts</code></p>
+<ol>
+  <li>File uploaded to Supabase Storage</li>
+  <li>Gemini extracts text from document (supports PDF, DOCX, images)</li>
+  <li>Text is chunked into sections</li>
+  <li>Tree index structure created with section summaries</li>
+  <li>Index stored in <code>knowledge_sources.tree_index</code></li>
+</ol>
+
+<h3>6.2 Retrieval System</h3>
+<p><strong>File:</strong> <code>src/lib/knowledge/tree-retriever.ts</code></p>
+<ul>
+  <li><strong>Reasoning-based retrieval:</strong> Uses Gemini to determine relevance</li>
+  <li><strong>Two-pass approach:</strong> First identifies relevant sections, then builds context</li>
+  <li><strong>Confidence threshold:</strong> Configurable per-bot (default 70%)</li>
+</ul>
+
+<h3>6.3 AI Integration</h3>
+<p><strong>File:</strong> <code>src/lib/gemini.ts</code></p>
+<ul>
+  <li><strong>Dual provider support:</strong> Google AI (default) or Vertex AI (EU)</li>
+  <li><strong>Model:</strong> gemini-2.0-flash for both extraction and chat</li>
+  <li><strong>Toggle:</strong> Set <code>USE_VERTEX_AI=true</code> for EU compliance</li>
+</ul>
+
+<div class="highlight">
+<strong>Cost per operation:</strong><br>
+- Chat query: ~$0.001 (2 Gemini calls)<br>
+- Document upload: ~$0.005 (depends on size)
+</div>
+
+<h3>6.4 Tier Limits System</h3>
+<p><strong>File:</strong> <code>src/lib/limits.ts</code></p>
+
+<table>
+  <tr><th>Feature</th><th>Free (Starter)</th><th>Plus</th></tr>
+  <tr><td>Bots</td><td>1</td><td>Unlimited (EUR5/bot)</td></tr>
+  <tr><td>Knowledge Sources/Bot</td><td>3</td><td>20 (or 1,000 pages)</td></tr>
+  <tr><td>Chats</td><td>50 lifetime</td><td>1,000/seat/month</td></tr>
+  <tr><td>Seats</td><td>1</td><td>Unlimited (EUR2/seat)</td></tr>
+  <tr><td>Branding</td><td>Cortexiva badge</td><td>White-label</td></tr>
+</table>
+
+<h2>7. Frontend Pages</h2>
+
+<table>
+  <tr><th>Route</th><th>Purpose</th></tr>
+  <tr><td>/homepage</td><td>Marketing landing page</td></tr>
+  <tr><td>/pricing-page</td><td>Pricing comparison</td></tr>
+  <tr><td>/login</td><td>User login</td></tr>
+  <tr><td>/signup</td><td>User registration</td></tr>
+  <tr><td>/forgot-password</td><td>Password reset request</td></tr>
+  <tr><td>/reset-password</td><td>Password reset form</td></tr>
+  <tr><td>/create-bot</td><td>Bot creation wizard</td></tr>
+  <tr><td>/create-bot-dashboard</td><td>Bot management dashboard</td></tr>
+  <tr><td>/configuration-bot</td><td>Bot configuration</td></tr>
+  <tr><td>/test-bot</td><td>Bot testing interface</td></tr>
+  <tr><td>/chat/[id]</td><td>Public chat interface</td></tr>
+</table>
+
+<h2>8. Security & Compliance</h2>
+
+<h3>8.1 Authentication</h3>
+<ul>
+  <li>Supabase Auth with email/password</li>
+  <li>OAuth support (Google, etc.) via Supabase</li>
+  <li>Row Level Security (RLS) on all tables</li>
+</ul>
+
+<h3>8.2 Authorization</h3>
+<ul>
+  <li>Users can only access their own bots and data</li>
+  <li>Public bots accessible via /chat/[id]</li>
+  <li>Domain-restricted access option</li>
+</ul>
+
+<h3>8.3 EU Data Residency</h3>
+<ul>
+  <li><strong>Database:</strong> Supabase Frankfurt region</li>
+  <li><strong>AI:</strong> Vertex AI europe-west4 (Netherlands)</li>
+  <li><strong>Storage:</strong> Supabase EU region</li>
+</ul>
+
+<h2>9. Environment Variables</h2>
+
+<pre>
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=xxx
+SUPABASE_SERVICE_ROLE_KEY=xxx
+
+# Google AI (default)
+GOOGLE_API_KEY=xxx
+
+# Vertex AI (EU compliant)
+USE_VERTEX_AI=true
+GOOGLE_CLOUD_PROJECT=your-project-id
+VERTEX_LOCATION=europe-west4
+
+# Stripe (planned)
+STRIPE_SECRET_KEY=xxx
+STRIPE_WEBHOOK_SECRET=xxx
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=xxx
+</pre>
+
+<h2>10. Deployment</h2>
+
+<h3>10.1 Prerequisites</h3>
+<ol>
+  <li>Node.js 18+</li>
+  <li>Supabase project (EU region recommended)</li>
+  <li>Google Cloud project with Gemini API enabled</li>
+  <li>Vercel account (recommended for deployment)</li>
+</ol>
+
+<h3>10.2 Database Setup</h3>
+<ol>
+  <li>Create Supabase project</li>
+  <li>Run <code>supabase/schema.sql</code> in SQL editor</li>
+  <li>Run migrations in <code>supabase/migrations/</code></li>
+  <li>Create storage bucket "knowledge"</li>
+</ol>
+
+<h3>10.3 Local Development</h3>
+<pre>
+npm install
+npm run dev
+</pre>
+
+<h3>10.4 Production Build</h3>
+<pre>
+npm run build
+npm start
+</pre>
+
+<h2>11. Cost Analysis</h2>
+
+<h3>11.1 Infrastructure Costs</h3>
+<table>
+  <tr><th>Service</th><th>Tier</th><th>Cost</th></tr>
+  <tr><td>Supabase</td><td>Free → Pro</td><td>$0 → $25/mo</td></tr>
+  <tr><td>Vercel</td><td>Hobby → Pro</td><td>$0 → $20/mo</td></tr>
+  <tr><td>Google AI</td><td>Pay-as-you-go</td><td>~$0.001/query</td></tr>
+</table>
+
+<h3>11.2 Unit Economics (Free Tier User)</h3>
+<table>
+  <tr><th>Metric</th><th>Value</th></tr>
+  <tr><td>Revenue</td><td>EUR1 one-time</td></tr>
+  <tr><td>Stripe fee</td><td>EUR0.29</td></tr>
+  <tr><td>AI cost (50 chats + 3 uploads)</td><td>~EUR0.065</td></tr>
+  <tr><td>Net revenue</td><td>~EUR0.65</td></tr>
+</table>
+
+<h3>11.3 Unit Economics (Plus Tier User)</h3>
+<table>
+  <tr><th>Metric</th><th>Value</th></tr>
+  <tr><td>Revenue (1 bot + 1 seat)</td><td>EUR7/mo</td></tr>
+  <tr><td>Stripe fee</td><td>EUR0.50</td></tr>
+  <tr><td>AI cost (1k chats + 20 uploads)</td><td>~EUR1.10</td></tr>
+  <tr><td>Net revenue</td><td>~EUR5.40/mo</td></tr>
+</table>
+
+<h2>12. Future Roadmap</h2>
+
+<h3>Near-term</h3>
+<ul>
+  <li>Stripe payment integration</li>
+  <li>Embeddable chat widget</li>
+  <li>Slack/Teams integration</li>
+  <li>Analytics dashboard</li>
+</ul>
+
+<h3>Mid-term</h3>
+<ul>
+  <li>Auto-sync with Notion/Google Drive</li>
+  <li>Multi-language support</li>
+  <li>API access for developers</li>
+  <li>Custom branding options</li>
+</ul>
+
+<h3>Long-term</h3>
+<ul>
+  <li>Voice bot capabilities</li>
+  <li>Enterprise SSO (SAML)</li>
+  <li>On-premise deployment option</li>
+  <li>Advanced analytics & insights</li>
+</ul>
+
+<hr>
+<p style="text-align: center; color: #888; font-size: 12px;">
+  Cortexiva Technical Documentation | Version 1.0 | January 2025<br>
+  Confidential - Internal Use Only
+</p>
+
+</body>
+</html>

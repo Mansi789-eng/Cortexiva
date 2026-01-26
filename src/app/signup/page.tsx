@@ -65,19 +65,19 @@ function SignupForm() {
 
   if (success) {
     return (
-      <div className="w-full max-w-md text-center">
-        <div className="w-16 h-16 rounded-full bg-[var(--success-light)] flex items-center justify-center mx-auto mb-6">
-          <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="w-full max-w-md text-center animate-fade-in">
+        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
+          <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)] mb-2">Check your email</h1>
-        <p className="text-[var(--text-secondary)] mb-6">
-          We&apos;ve sent a confirmation link to <strong>{email}</strong>. Click the link to activate your account.
+        <h1 className="text-2xl font-semibold text-dark mb-2">Check your email</h1>
+        <p className="text-gray-500 mb-6">
+          We&apos;ve sent a confirmation link to <strong className="text-dark">{email}</strong>. Click the link to activate your account.
         </p>
         <Link
           href="/login"
-          className="inline-flex items-center gap-2 text-[var(--accent-primary)] hover:underline font-medium"
+          className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -89,21 +89,18 @@ function SignupForm() {
   }
 
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-md animate-fade-in">
       {/* Logo/Brand */}
       <div className="text-center mb-8">
-        <Link href="/" className="inline-flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
-            <span className="text-white font-bold text-lg">C</span>
-          </div>
-          <span className="text-xl font-semibold text-[var(--text-primary)]">Cortexiva</span>
+        <Link href="/homepage" className="inline-flex items-center">
+          <span className="text-3xl font-bold gradient-text">Cortexiva</span>
         </Link>
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)] mt-6">Create your account</h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-2">Start building knowledge bots for your team</p>
+        <h1 className="text-2xl font-semibold text-dark mt-6">Create your account</h1>
+        <p className="text-sm text-gray-500 mt-2">Start building knowledge bots for your team</p>
       </div>
 
       {/* Signup Card */}
-      <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-8">
+      <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-xl">
         {/* Error Message */}
         {error && (
           <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
@@ -114,7 +111,7 @@ function SignupForm() {
         {/* Google Signup */}
         <button
           onClick={handleGoogleSignup}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-[var(--card-border)] bg-white hover:bg-gray-50 transition-colors text-[var(--text-primary)] font-medium"
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors text-dark font-medium"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -139,15 +136,15 @@ function SignupForm() {
 
         {/* Divider */}
         <div className="flex items-center gap-4 my-6">
-          <div className="flex-1 h-px bg-[var(--card-border)]" />
-          <span className="text-sm text-[var(--text-muted)]">or</span>
-          <div className="flex-1 h-px bg-[var(--card-border)]" />
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-sm text-gray-400">or</span>
+          <div className="flex-1 h-px bg-gray-200" />
         </div>
 
         {/* Email Signup Form */}
         <form onSubmit={handleEmailSignup} className="space-y-4">
           <div>
-            <label htmlFor="fullName" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+            <label htmlFor="fullName" className="block text-sm font-medium text-dark mb-2">
               Full Name
             </label>
             <input
@@ -157,12 +154,12 @@ function SignupForm() {
               onChange={(e) => setFullName(e.target.value)}
               placeholder="John Doe"
               required
-              className="w-full px-4 py-3 rounded-xl border border-[var(--card-border)] bg-[var(--background)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-subtle)] transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-dark placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+            <label htmlFor="email" className="block text-sm font-medium text-dark mb-2">
               Email
             </label>
             <input
@@ -172,12 +169,12 @@ function SignupForm() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@company.com"
               required
-              className="w-full px-4 py-3 rounded-xl border border-[var(--card-border)] bg-[var(--background)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-subtle)] transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-dark placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-dark mb-2">
               Password
             </label>
             <input
@@ -188,39 +185,39 @@ function SignupForm() {
               placeholder="••••••••"
               required
               minLength={6}
-              className="w-full px-4 py-3 rounded-xl border border-[var(--card-border)] bg-[var(--background)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-subtle)] transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-dark placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
             />
-            <p className="text-xs text-[var(--text-muted)] mt-1">Must be at least 6 characters</p>
+            <p className="text-xs text-gray-400 mt-1">Must be at least 6 characters</p>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-4 py-3 rounded-xl bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-primary w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Creating account...' : 'Create account'}
           </button>
         </form>
 
         {/* Terms */}
-        <p className="text-xs text-[var(--text-muted)] text-center mt-4">
+        <p className="text-xs text-gray-400 text-center mt-4">
           By signing up, you agree to our{' '}
-          <Link href="/terms" className="text-[var(--accent-primary)] hover:underline">
+          <Link href="/terms" className="text-primary hover:underline">
             Terms of Service
           </Link>{' '}
           and{' '}
-          <Link href="/privacy" className="text-[var(--accent-primary)] hover:underline">
+          <Link href="/privacy" className="text-primary hover:underline">
             Privacy Policy
           </Link>
         </p>
       </div>
 
       {/* Login link */}
-      <p className="text-center text-sm text-[var(--text-secondary)] mt-6">
+      <p className="text-center text-sm text-gray-500 mt-6">
         Already have an account?{' '}
         <Link
           href={`/login${redirectTo !== '/create-bot-dashboard' ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`}
-          className="text-[var(--accent-primary)] hover:underline font-medium"
+          className="text-primary hover:underline font-medium"
         >
           Sign in
         </Link>
@@ -253,7 +250,13 @@ function SignupFallback() {
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center p-4">
+      {/* Background decoration */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+      </div>
+
       <Suspense fallback={<SignupFallback />}>
         <SignupForm />
       </Suspense>

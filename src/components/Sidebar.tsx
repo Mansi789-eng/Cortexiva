@@ -36,11 +36,8 @@ export default function Sidebar() {
     <aside className="fixed left-0 top-0 h-screen w-64 bg-[var(--sidebar-bg)] border-r border-[var(--card-border)] flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b border-[var(--card-border)]">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
-            <span className="text-white font-bold text-lg">C</span>
-          </div>
-          <span className="text-xl font-semibold text-[var(--text-primary)]">Cortexiva</span>
+        <Link href="/" className="flex items-center">
+          <span className="text-2xl font-bold gradient-text">Cortexiva</span>
         </Link>
       </div>
 

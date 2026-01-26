@@ -14,22 +14,29 @@ export interface TierLimits {
   branding: boolean;
 }
 
-export const TIER_LIMITS: Record<Tier, TierLimits> = {
-  free: {
-    bots: 1,
-    knowledgeSourcesPerBot: 3,
-    totalChats: 50, // Lifetime total
-    seats: 1,
-    branding: true,
-  },
-  plus: {
-    bots: Infinity, // Unlimited (€5/bot)
-    knowledgeSourcesPerBot: 20, // Or 1000 pages
-    totalChats: 1000, // Per seat per month
-    seats: Infinity, // Unlimited (€2/seat)
-    branding: false,
-  },
+// Base limits for free tier
+export const FREE_TIER_LIMITS: TierLimits = {
+  bots: 1,
+  knowledgeSourcesPerBot: 3,
+  totalChats: 50, // Lifetime total
+  seats: 1,
+  branding: true,
 };
+
+// Plus tier limits (per-unit)
+export const PLUS_TIER_BASE = {
+  knowledgeSourcesPerBot: 20,
+  chatsPerSeat: 1000, // Per seat per month
+  branding: false,
+};
+
+// Profile subscription data
+export interface ProfileSubscription {
+  tier: Tier;
+  starter_paid: boolean;
+  plus_bots: number;
+  plus_seats: number;
+}
 
 // ============================================
 // Limit Check Helpers
@@ -43,19 +50,53 @@ export interface LimitCheckResult {
 }
 
 /**
- * Get user's tier from profile
+ * Get user's profile with subscription data
+ */
+export async function getUserProfile(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<ProfileSubscription | null> {
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('tier, starter_paid, plus_bots, plus_seats')
+    .eq('id', userId)
+    .single();
+
+  if (!profile) return null;
+
+  return {
+    tier: (profile.tier as Tier) || 'free',
+    starter_paid: profile.starter_paid ?? false,
+    plus_bots: profile.plus_bots ?? 0,
+    plus_seats: profile.plus_seats ?? 0,
+  };
+}
+
+/**
+ * Get user's tier from profile (backwards compatible)
  */
 export async function getUserTier(
   supabase: SupabaseClient,
   userId: string
 ): Promise<Tier> {
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('tier')
-    .eq('id', userId)
-    .single();
+  const profile = await getUserProfile(supabase, userId);
+  return profile?.tier || 'free';
+}
 
-  return (profile?.tier as Tier) || 'free';
+/**
+ * Get effective limits for a user based on tier and subscription
+ */
+export function getEffectiveLimits(profile: ProfileSubscription): TierLimits {
+  if (profile.tier === 'plus') {
+    return {
+      bots: profile.plus_bots || 1,
+      knowledgeSourcesPerBot: PLUS_TIER_BASE.knowledgeSourcesPerBot,
+      totalChats: (profile.plus_seats || 1) * PLUS_TIER_BASE.chatsPerSeat,
+      seats: profile.plus_seats || 1,
+      branding: PLUS_TIER_BASE.branding,
+    };
+  }
+  return FREE_TIER_LIMITS;
 }
 
 /**
@@ -65,8 +106,12 @@ export async function checkBotLimit(
   supabase: SupabaseClient,
   userId: string
 ): Promise<LimitCheckResult> {
-  const tier = await getUserTier(supabase, userId);
-  const limits = TIER_LIMITS[tier];
+  const profile = await getUserProfile(supabase, userId);
+  if (!profile) {
+    return { allowed: false, current: 0, limit: 0, message: 'Profile not found' };
+  }
+
+  const limits = getEffectiveLimits(profile);
 
   // Count existing bots
   const { count } = await supabase
@@ -81,9 +126,9 @@ export async function checkBotLimit(
       allowed: false,
       current: currentCount,
       limit: limits.bots,
-      message: tier === 'free'
-        ? 'Free tier allows only 1 bot. Upgrade to Plus for unlimited bots.'
-        : 'Bot limit reached.',
+      message: profile.tier === 'free'
+        ? 'Free tier allows only 1 bot. Upgrade to Plus for more bots.'
+        : `You have ${limits.bots} bot(s) in your subscription. Add more bots to create another.`,
     };
   }
 
@@ -102,8 +147,12 @@ export async function checkKnowledgeSourceLimit(
   userId: string,
   botId: string
 ): Promise<LimitCheckResult> {
-  const tier = await getUserTier(supabase, userId);
-  const limits = TIER_LIMITS[tier];
+  const profile = await getUserProfile(supabase, userId);
+  if (!profile) {
+    return { allowed: false, current: 0, limit: 0, message: 'Profile not found' };
+  }
+
+  const limits = getEffectiveLimits(profile);
 
   // Count existing knowledge sources for this bot
   const { count } = await supabase
@@ -118,7 +167,7 @@ export async function checkKnowledgeSourceLimit(
       allowed: false,
       current: currentCount,
       limit: limits.knowledgeSourcesPerBot,
-      message: tier === 'free'
+      message: profile.tier === 'free'
         ? 'Free tier allows only 3 knowledge sources. Upgrade to Plus for 20 sources per bot.'
         : 'Knowledge source limit reached for this bot.',
     };
@@ -134,16 +183,13 @@ export async function checkKnowledgeSourceLimit(
 /**
  * Check if user can send a chat message
  * For free tier: 50 lifetime total across all bots
- * For plus tier: 1000 per seat per month (simplified: per user per month)
+ * For plus tier: 1000 per seat per month
  */
 export async function checkChatLimit(
   supabase: SupabaseClient,
   userId: string,
   botId: string
 ): Promise<LimitCheckResult> {
-  const tier = await getUserTier(supabase, userId);
-  const limits = TIER_LIMITS[tier];
-
   // Get bot owner to check their tier (for public bots)
   const { data: bot } = await supabase
     .from('bots')
@@ -155,15 +201,19 @@ export async function checkChatLimit(
     return { allowed: false, current: 0, limit: 0, message: 'Bot not found' };
   }
 
-  const ownerTier = await getUserTier(supabase, bot.user_id);
-  const ownerLimits = TIER_LIMITS[ownerTier];
+  const ownerProfile = await getUserProfile(supabase, bot.user_id);
+  if (!ownerProfile) {
+    return { allowed: false, current: 0, limit: 0, message: 'Owner profile not found' };
+  }
+
+  const limits = getEffectiveLimits(ownerProfile);
 
   // Count total messages for this bot owner
   // For free tier: count ALL messages ever (lifetime)
   // For plus tier: count messages this month
   let totalMessages = 0;
 
-  if (ownerTier === 'free') {
+  if (ownerProfile.tier === 'free') {
     // Count all messages across all bots owned by this user (lifetime)
     const { data: ownerBots } = await supabase
       .from('bots')
@@ -215,13 +265,13 @@ export async function checkChatLimit(
     }
   }
 
-  if (totalMessages >= ownerLimits.totalChats) {
+  if (totalMessages >= limits.totalChats) {
     return {
       allowed: false,
       current: totalMessages,
-      limit: ownerLimits.totalChats,
-      message: ownerTier === 'free'
-        ? 'Free tier limit of 50 chats reached. Upgrade to Plus for 1,000 chats per seat per month.'
+      limit: limits.totalChats,
+      message: ownerProfile.tier === 'free'
+        ? 'Free tier limit of 50 chats reached. Upgrade to Plus for more capacity.'
         : 'Monthly chat limit reached. Add more seats for additional chat capacity.',
     };
   }
@@ -229,8 +279,19 @@ export async function checkChatLimit(
   return {
     allowed: true,
     current: totalMessages,
-    limit: ownerLimits.totalChats,
+    limit: limits.totalChats,
   };
+}
+
+/**
+ * Check if user has paid the €1 starter fee
+ */
+export async function checkStarterPayment(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<boolean> {
+  const profile = await getUserProfile(supabase, userId);
+  return profile?.starter_paid ?? false;
 }
 
 /**
@@ -240,8 +301,12 @@ export async function getUsageSummary(
   supabase: SupabaseClient,
   userId: string
 ) {
-  const tier = await getUserTier(supabase, userId);
-  const limits = TIER_LIMITS[tier];
+  const profile = await getUserProfile(supabase, userId);
+  if (!profile) {
+    return null;
+  }
+
+  const limits = getEffectiveLimits(profile);
 
   // Count bots
   const { count: botCount } = await supabase
@@ -249,7 +314,7 @@ export async function getUsageSummary(
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId);
 
-  // Count total chats
+  // Count total chats (this month for plus, lifetime for free)
   const { data: userBots } = await supabase
     .from('bots')
     .select('id')
@@ -259,21 +324,42 @@ export async function getUsageSummary(
   let totalChats = 0;
 
   if (botIds.length > 0) {
-    const { data: chats } = await supabase
-      .from('chats')
-      .select('messages')
-      .in('bot_id', botIds);
+    if (profile.tier === 'plus') {
+      // Plus: this month only
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
 
-    totalChats = chats?.reduce((acc, chat) => {
-      const userMessages = (chat.messages as Array<{ role: string }>)?.filter(
-        m => m.role === 'user'
-      ).length || 0;
-      return acc + userMessages;
-    }, 0) || 0;
+      const { data: chats } = await supabase
+        .from('chats')
+        .select('messages, updated_at')
+        .in('bot_id', botIds)
+        .gte('updated_at', startOfMonth.toISOString());
+
+      totalChats = chats?.reduce((acc, chat) => {
+        const userMessages = (chat.messages as Array<{ role: string }>)?.filter(
+          m => m.role === 'user'
+        ).length || 0;
+        return acc + userMessages;
+      }, 0) || 0;
+    } else {
+      // Free: lifetime
+      const { data: chats } = await supabase
+        .from('chats')
+        .select('messages')
+        .in('bot_id', botIds);
+
+      totalChats = chats?.reduce((acc, chat) => {
+        const userMessages = (chat.messages as Array<{ role: string }>)?.filter(
+          m => m.role === 'user'
+        ).length || 0;
+        return acc + userMessages;
+      }, 0) || 0;
+    }
   }
 
   return {
-    tier,
+    profile,
     limits,
     usage: {
       bots: botCount || 0,
