@@ -2,19 +2,6 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Routes that require €1 starter payment
-const PAYMENT_GATED_ROUTES = [
-  '/create-bot-dashboard',
-  '/create-bot',
-  '/configuration-bot',
-  '/test-bot',
-];
-
-// Routes that require authentication but NOT payment
-const AUTH_ONLY_ROUTES = [
-  '/pricing-page', // Can view pricing while logged in
-];
-
 // Public routes (no auth required)
 const PUBLIC_ROUTES = [
   '/',
@@ -24,7 +11,6 @@ const PUBLIC_ROUTES = [
   '/forgot-password',
   '/reset-password',
   '/auth',
-  '/payment-success',
 ];
 
 export async function middleware(request: NextRequest) {
@@ -93,27 +79,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Check if route requires payment
-  const requiresPayment = PAYMENT_GATED_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
-  );
-
-  if (requiresPayment) {
-    // Get profile to check starter_paid
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('starter_paid')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile?.starter_paid) {
-      // Not paid, redirect to pricing page
-      const pricingUrl = new URL('/pricing-page', request.url);
-      pricingUrl.searchParams.set('gate', 'starter');
-      return NextResponse.redirect(pricingUrl);
-    }
-  }
-
   return response;
 }
 
@@ -126,6 +91,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\..*|api/stripe/webhook).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)',
   ],
 };

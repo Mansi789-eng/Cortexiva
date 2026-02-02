@@ -4,7 +4,6 @@ import { getChatModel } from '@/lib/gemini';
 import { searchWithReasoning, buildContextFromResults } from '@/lib/knowledge/tree-retriever';
 import { v4 as uuidv4 } from 'uuid';
 import type { BotConfig, ChatMessage } from '@/lib/types/database';
-import { checkChatLimit } from '@/lib/limits';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -34,17 +33,6 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     if (botError || !bot) {
       return NextResponse.json({ error: 'Bot not found' }, { status: 404 });
-    }
-
-    // Check chat limit based on bot owner's tier
-    // Get current user if authenticated (optional for public bots)
-    const { data: { user } } = await supabase.auth.getUser();
-    const limitCheck = await checkChatLimit(supabase, user?.id || bot.user_id, botId);
-    if (!limitCheck.allowed) {
-      return NextResponse.json(
-        { error: limitCheck.message, limit: limitCheck.limit, current: limitCheck.current },
-        { status: 403 }
-      );
     }
 
     // Note: Allow testing for any status (draft, active, paused)

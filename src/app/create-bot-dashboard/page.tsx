@@ -27,9 +27,11 @@ const departments: Record<string, { name: string; icon: string }> = {
 
 const statusColors = {
   draft: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Draft' },
-  active: { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Active' },
-  paused: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Paused' },
+  active: { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Published' },
+  paused: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Unpublished' },
 };
+
+const BOT_LIMIT = 1; // Free tier limit
 
 export default function CreateBotDashboard() {
   const router = useRouter();
@@ -37,6 +39,10 @@ export default function CreateBotDashboard() {
   const [bots, setBots] = useState<Bot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [togglingBotId, setTogglingBotId] = useState<string | null>(null);
+
+  // Check if user can create more bots
+  const canCreateBot = bots.length < BOT_LIMIT;
 
   useEffect(() => {
     fetchBots();
@@ -74,6 +80,34 @@ export default function CreateBotDashboard() {
     router.push(`/test-bot?id=${botId}`);
   };
 
+  const handleTogglePublish = async (e: React.MouseEvent, bot: Bot) => {
+    e.stopPropagation();
+    setTogglingBotId(bot.id);
+
+    const newStatus = bot.status === 'active' ? 'paused' : 'active';
+
+    try {
+      const response = await fetch(`/api/bots/${bot.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update bot status');
+      }
+
+      // Update local state
+      setBots(bots.map(b =>
+        b.id === bot.id ? { ...b, status: newStatus } : b
+      ));
+    } catch (err) {
+      console.error('Error toggling publish status:', err);
+    } finally {
+      setTogglingBotId(null);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -94,7 +128,7 @@ export default function CreateBotDashboard() {
               <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Dashboard</h1>
               <p className="text-sm text-[var(--text-secondary)] mt-1">Create and manage your knowledge bots</p>
             </div>
-            {bots.length > 0 && (
+            {bots.length > 0 && canCreateBot && (
               <button
                 onClick={handleCreateBot}
                 className="px-5 py-2.5 rounded-xl bg-[var(--accent-primary)] text-white text-sm font-medium hover:bg-[var(--accent-primary-hover)] transition-colors flex items-center gap-2"
@@ -186,13 +220,34 @@ export default function CreateBotDashboard() {
                     <div className="w-12 h-12 rounded-xl bg-[var(--accent-subtle)] flex items-center justify-center text-2xl">
                       {departments[bot.department]?.icon || '🤖'}
                     </div>
-                    <span
-                      className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                        statusColors[bot.status]?.bg || 'bg-gray-100'
-                      } ${statusColors[bot.status]?.text || 'text-gray-700'}`}
-                    >
-                      {statusColors[bot.status]?.label || bot.status}
-                    </span>
+                    {bot.status === 'draft' ? (
+                      <span
+                        className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusColors.draft.bg} ${statusColors.draft.text}`}
+                      >
+                        {statusColors.draft.label}
+                      </span>
+                    ) : (
+                      <button
+                        onClick={(e) => handleTogglePublish(e, bot)}
+                        disabled={togglingBotId === bot.id}
+                        className="flex items-center gap-2 group/toggle"
+                      >
+                        <span className={`text-xs font-medium ${bot.status === 'active' ? 'text-emerald-600' : 'text-gray-500'}`}>
+                          {bot.status === 'active' ? 'Published' : 'Unpublished'}
+                        </span>
+                        <div
+                          className={`relative w-10 h-5 rounded-full transition-colors ${
+                            bot.status === 'active' ? 'bg-emerald-500' : 'bg-gray-300'
+                          } ${togglingBotId === bot.id ? 'opacity-50' : ''}`}
+                        >
+                          <div
+                            className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                              bot.status === 'active' ? 'translate-x-5' : 'translate-x-0.5'
+                            }`}
+                          />
+                        </div>
+                      </button>
+                    )}
                   </div>
 
                   <h3 className="text-lg font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent-primary)] transition-colors">
@@ -212,7 +267,7 @@ export default function CreateBotDashboard() {
                     <span className="text-xs text-[var(--text-muted)]">
                       Created {formatDate(bot.created_at)}
                     </span>
-                    {bot.status === 'active' && (
+                    {bot.status !== 'active' && (
                       <button
                         onClick={(e) => handleTestBot(e, bot.id)}
                         className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--accent-primary)] bg-[var(--accent-subtle)] hover:bg-[var(--accent-primary)] hover:text-white transition-colors"
@@ -225,24 +280,45 @@ export default function CreateBotDashboard() {
               ))}
 
               {/* Create New Bot Card */}
-              <button
-                onClick={handleCreateBot}
-                className="p-6 rounded-2xl border-2 border-dashed border-[var(--card-border)] bg-[var(--card-bg)] hover:border-[var(--accent-primary)] hover:bg-[var(--accent-subtle)]/30 transition-all flex flex-col items-center justify-center min-h-[220px] group"
-              >
-                <div className="w-12 h-12 rounded-xl bg-[var(--sidebar-hover)] group-hover:bg-[var(--accent-primary)] flex items-center justify-center transition-colors">
-                  <svg
-                    className="w-6 h-6 text-[var(--text-muted)] group-hover:text-white transition-colors"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
+              {canCreateBot ? (
+                <button
+                  onClick={handleCreateBot}
+                  className="p-6 rounded-2xl border-2 border-dashed border-[var(--card-border)] bg-[var(--card-bg)] hover:border-[var(--accent-primary)] hover:bg-[var(--accent-subtle)]/30 transition-all flex flex-col items-center justify-center min-h-[220px] group"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-[var(--sidebar-hover)] group-hover:bg-[var(--accent-primary)] flex items-center justify-center transition-colors">
+                    <svg
+                      className="w-6 h-6 text-[var(--text-muted)] group-hover:text-white transition-colors"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-medium text-[var(--text-secondary)] group-hover:text-[var(--accent-primary)] mt-3 transition-colors">
+                    Create New Bot
+                  </p>
+                </button>
+              ) : (
+                <div className="p-6 rounded-2xl border-2 border-dashed border-[var(--card-border)] bg-[var(--card-bg)] opacity-60 flex flex-col items-center justify-center min-h-[220px] cursor-not-allowed">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--sidebar-hover)] flex items-center justify-center">
+                    <svg
+                      className="w-6 h-6 text-[var(--text-muted)]"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-medium text-[var(--text-muted)] mt-3">
+                    Bot Limit Reached
+                  </p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">
+                    Free plan: 1 bot max
+                  </p>
                 </div>
-                <p className="text-sm font-medium text-[var(--text-secondary)] group-hover:text-[var(--accent-primary)] mt-3 transition-colors">
-                  Create New Bot
-                </p>
-              </button>
+              )}
             </div>
           )}
         </div>

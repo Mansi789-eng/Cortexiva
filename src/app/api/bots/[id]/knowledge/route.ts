@@ -46,8 +46,8 @@ export async function POST(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: 'Bot not found' }, { status: 404 });
     }
 
-    // Check knowledge source limit based on user's tier
-    const limitCheck = await checkKnowledgeSourceLimit(supabase, user.id, botId);
+    // Check knowledge source limit
+    const limitCheck = await checkKnowledgeSourceLimit(supabase, botId);
     if (!limitCheck.allowed) {
       return NextResponse.json(
         { error: limitCheck.message, limit: limitCheck.limit, current: limitCheck.current },

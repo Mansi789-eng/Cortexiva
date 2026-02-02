@@ -103,9 +103,6 @@ export default function Homepage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </Link>
-              <Link href="/pricing-page" className="btn-secondary">
-                View Pricing
-              </Link>
             </div>
           </div>
 
@@ -382,7 +379,6 @@ export default function Homepage() {
               <ul className="space-y-2">
                 <li><a href="#features" className="text-gray-400 hover:text-primary transition-colors text-sm">Features</a></li>
                 <li><a href="#integrations" className="text-gray-400 hover:text-primary transition-colors text-sm">Integrations</a></li>
-                <li><Link href="/pricing-page" className="text-gray-400 hover:text-primary transition-colors text-sm">Pricing</Link></li>
               </ul>
             </div>
 

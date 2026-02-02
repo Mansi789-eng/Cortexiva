@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check bot limit based on user's tier
+    // Check bot limit
     const limitCheck = await checkBotLimit(supabase, user.id);
     if (!limitCheck.allowed) {
       return NextResponse.json(

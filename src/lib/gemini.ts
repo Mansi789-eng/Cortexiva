@@ -45,16 +45,26 @@ if (USE_VERTEX_AI) {
 }
 
 // ============================================
-// Provider Initialization
+// Provider Initialization (Lazy)
 // ============================================
 
 // Google AI (default - simpler setup)
 const googleAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
 
-// Vertex AI (EU compliant)
-const vertexAI = USE_VERTEX_AI && VERTEX_PROJECT
-  ? new VertexAI({ project: VERTEX_PROJECT, location: VERTEX_LOCATION })
-  : null;
+// Vertex AI (EU compliant) - lazy initialization to pick up env changes
+let _vertexAI: VertexAI | null = null;
+
+function getVertexAI(): VertexAI | null {
+  if (!USE_VERTEX_AI || !VERTEX_PROJECT) return null;
+
+  if (!_vertexAI) {
+    // Re-run credentials setup to ensure fresh env vars are used
+    setupVertexCredentials();
+    _vertexAI = new VertexAI({ project: VERTEX_PROJECT, location: VERTEX_LOCATION });
+    console.log(`[Gemini] Initialized Vertex AI (${VERTEX_LOCATION})`);
+  }
+  return _vertexAI;
+}
 
 console.log(`[Gemini] Provider: ${USE_VERTEX_AI ? `Vertex AI (${VERTEX_LOCATION})` : 'Google AI'}`);
 
@@ -70,12 +80,39 @@ interface GenerativeModel {
 }
 
 function getModel(modelName: string): GenerativeModel {
+  const vertexAI = getVertexAI();
   if (USE_VERTEX_AI && vertexAI) {
     // Vertex AI model
     const model = vertexAI.getGenerativeModel({ model: modelName });
     return {
       generateContent: async (request: unknown) => {
-        const result = await model.generateContent(request as Parameters<typeof model.generateContent>[0]);
+        // Convert array format [prompt, filePart] to Vertex AI format
+        let vertexRequest: Parameters<typeof model.generateContent>[0];
+
+        if (Array.isArray(request)) {
+          // Convert array to Vertex AI contents format
+          const parts = request.map((item) => {
+            if (typeof item === 'string') {
+              return { text: item };
+            } else if (item && typeof item === 'object' && 'inlineData' in item) {
+              return { inlineData: (item as { inlineData: { mimeType: string; data: string } }).inlineData };
+            }
+            return item;
+          });
+          vertexRequest = {
+            contents: [{ role: 'user', parts }],
+          };
+        } else if (typeof request === 'string') {
+          // Simple string prompt
+          vertexRequest = {
+            contents: [{ role: 'user', parts: [{ text: request }] }],
+          };
+        } else {
+          // Already in correct format
+          vertexRequest = request as Parameters<typeof model.generateContent>[0];
+        }
+
+        const result = await model.generateContent(vertexRequest);
         const response = await result.response;
         return {
           response: {
