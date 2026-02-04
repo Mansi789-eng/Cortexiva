@@ -96,13 +96,14 @@ export default function Homepage() {
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-wrap gap-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+            <div className="flex flex-wrap items-center gap-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
               <Link href="/login" className="btn-primary">
                 Start Building
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </Link>
+              <span className="text-sm text-gray-500">Free 1 bot forever with unlimited queries</span>
             </div>
           </div>
 
@@ -379,6 +380,7 @@ export default function Homepage() {
               <ul className="space-y-2">
                 <li><a href="#features" className="text-gray-400 hover:text-primary transition-colors text-sm">Features</a></li>
                 <li><a href="#integrations" className="text-gray-400 hover:text-primary transition-colors text-sm">Integrations</a></li>
+                <li><Link href="/blog" className="text-gray-400 hover:text-primary transition-colors text-sm">Blog</Link></li>
               </ul>
             </div>
 

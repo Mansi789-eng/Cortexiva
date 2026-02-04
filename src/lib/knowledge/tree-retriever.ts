@@ -14,6 +14,7 @@ export interface RelevantSection {
   summary: string;
   relevanceScore: number;
   sourceName: string;
+  sourceUpdatedAt: string;
 }
 
 export interface RetrievalResult {
@@ -38,7 +39,7 @@ export async function searchWithReasoning(
   // Get all knowledge sources with tree indexes for this bot
   const { data: sources, error } = await supabase
     .from('knowledge_sources')
-    .select('id, name, tree_index, content')
+    .select('id, name, tree_index, content, updated_at')
     .eq('bot_id', botId)
     .eq('status', 'completed');
 
@@ -165,6 +166,7 @@ Rules:
           summary: section.summary,
           relevanceScore: match.relevanceScore || 0.8,
           sourceName: source.name,
+          sourceUpdatedAt: source.updated_at,
         });
       }
     }
@@ -203,7 +205,7 @@ function findSectionById(sections: TreeSection[], id: string): TreeSection | nul
   return null;
 }
 
-function fallbackRetrieval(sources: Array<{ name: string; tree_index: unknown; content: string | null }>): RetrievalResult {
+function fallbackRetrieval(sources: Array<{ name: string; tree_index: unknown; content: string | null; updated_at: string }>): RetrievalResult {
   // Fallback: return content from all sources
   const relevantSections: RelevantSection[] = [];
 
@@ -220,6 +222,7 @@ function fallbackRetrieval(sources: Array<{ name: string; tree_index: unknown; c
           summary: section.summary,
           relevanceScore: 0.5,
           sourceName: source.name,
+          sourceUpdatedAt: source.updated_at,
         });
       }
     } else if (source.content) {
@@ -232,6 +235,7 @@ function fallbackRetrieval(sources: Array<{ name: string; tree_index: unknown; c
         summary: 'Document content',
         relevanceScore: 0.5,
         sourceName: source.name,
+        sourceUpdatedAt: source.updated_at,
       });
     }
   }

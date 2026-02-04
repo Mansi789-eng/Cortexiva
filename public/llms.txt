@@ -1,0 +1,45 @@
+# Cortexiva - AI-Powered Knowledge Bots
+
+> Knowledge bots that stay fresh. Built for teams who hate outdated docs.
+
+## What is Cortexiva?
+
+Cortexiva is a platform for creating AI-powered knowledge bots that help teams access information instantly. Instead of searching through wikis, Slack threads, or asking colleagues, teams can query a bot that understands their documentation.
+
+## Key Features
+
+- **Always Fresh Knowledge**: Auto-sync with your tools. When docs update, your bot learns instantly.
+- **Department-Ready Templates**: Pre-built templates for HR, Sales, Engineering, Support.
+- **24+ Integrations** (Coming Soon): Connect Slack, Notion, Confluence, Google Drive, GitHub.
+- **Instant Answers**: Sub-second response times.
+- **100% EU Data Residency**: All data stays in the European Union. GDPR compliant.
+
+## Use Cases
+
+1. **HR Teams**: Employee self-service for policy questions, handbook queries, benefits info.
+2. **Support Teams**: Instant access to product docs, troubleshooting guides.
+3. **Engineering Teams**: Onboard new developers with instant answers from codebase docs.
+
+## How It Works
+
+1. Connect your data sources (Notion, Google Drive, upload files)
+2. Customize your bot (tone, guardrails, access control)
+3. Share & deploy (link, Slack embed, website widget)
+
+## Links
+
+- Homepage: https://cortexiva.com
+- Login: https://cortexiva.com/login
+- Sign Up: https://cortexiva.com/signup
+- Blog: https://cortexiva.com/blog
+
+## Contact
+
+For partnerships or inquiries, visit https://cortexiva.com
+
+## Technical Details
+
+- Built with Next.js and hosted on Vercel (EU region)
+- Database: Supabase (Frankfurt, EU)
+- LLM: Google Vertex AI (Netherlands, EU)
+- Authentication: Email/password, magic links

@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getChatModel } from '@/lib/gemini';
 import { searchWithReasoning, buildContextFromResults } from '@/lib/knowledge/tree-retriever';
 import { v4 as uuidv4 } from 'uuid';
-import type { BotConfig, ChatMessage } from '@/lib/types/database';
+import type { BotConfig, ChatMessage, SourceInfo } from '@/lib/types/database';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -49,10 +49,19 @@ export async function POST(request: Request, { params }: RouteParams) {
     // Build context from retrieval results
     const relevantContext = buildContextFromResults(retrievalResult);
 
-    // Extract unique source names for citation
-    const sourceNames = retrievalResult.relevantSections
-      .map(s => s.sourceName)
-      .filter((v, i, a) => a.indexOf(v) === i);
+    // Extract unique sources with timestamps for citation
+    const sourceMap = new Map<string, SourceInfo>();
+    for (const section of retrievalResult.relevantSections) {
+      const existing = sourceMap.get(section.sourceName);
+      // Keep the most recent update timestamp
+      if (!existing || new Date(section.sourceUpdatedAt) > new Date(existing.updatedAt)) {
+        sourceMap.set(section.sourceName, {
+          name: section.sourceName,
+          updatedAt: section.sourceUpdatedAt,
+        });
+      }
+    }
+    const sources: SourceInfo[] = Array.from(sourceMap.values());
 
     // Get or create chat session
     let { data: chat } = await supabase
@@ -112,7 +121,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       role: 'assistant',
       content: assistantMessage,
       timestamp: new Date().toISOString(),
-      sources: sourceNames,
+      sources,
     };
 
     const updatedMessages = [...previousMessages, userMsg, assistantMsg];
@@ -138,7 +147,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     return NextResponse.json({
       message: assistantMsg,
       sessionId: chatSessionId,
-      sources: sourceNames,
+      sources,
       reasoning: retrievalResult.reasoning, // Include reasoning for transparency
     });
   } catch (error) {

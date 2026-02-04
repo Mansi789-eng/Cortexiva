@@ -192,13 +192,19 @@ export interface BotConfig {
   allowedDomain: string;
 }
 
+// Source info with timestamp
+export interface SourceInfo {
+  name: string;
+  updatedAt: string;
+}
+
 // Chat message type
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
-  sources?: string[];
+  sources?: SourceInfo[];
 }
 
 // Default bot config

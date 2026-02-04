@@ -16,12 +16,44 @@ interface BotData {
   };
 }
 
+interface SourceInfo {
+  name: string;
+  updatedAt: string;
+}
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  sources?: string[];
+  sources?: SourceInfo[];
+}
+
+// Helper function to format relative time
+function formatTimeAgo(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return 'just now';
+  if (diffInSeconds < 3600) {
+    const mins = Math.floor(diffInSeconds / 60);
+    return `${mins} ${mins === 1 ? 'minute' : 'minutes'} ago`;
+  }
+  if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600);
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+  }
+  if (diffInSeconds < 2592000) {
+    const days = Math.floor(diffInSeconds / 86400);
+    return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+  }
+  if (diffInSeconds < 31536000) {
+    const months = Math.floor(diffInSeconds / 2592000);
+    return `${months} ${months === 1 ? 'month' : 'months'} ago`;
+  }
+  const years = Math.floor(diffInSeconds / 31536000);
+  return `${years} ${years === 1 ? 'year' : 'years'} ago`;
 }
 
 const departments: Record<string, { name: string; icon: string }> = {
@@ -354,10 +386,15 @@ export default function PublicChat({ params }: { params: Promise<{ id: string }>
               >
                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                 {message.sources && message.sources.length > 0 && (
-                  <div className="mt-2 pt-2 border-t border-slate-200/50">
-                    <p className="text-xs text-slate-400">
-                      Sources: {message.sources.join(', ')}
-                    </p>
+                  <div className="mt-2 pt-2 border-t border-slate-200/50 space-y-1">
+                    {message.sources.map((source, idx) => (
+                      <p key={idx} className="text-xs text-slate-400 flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
+                        </svg>
+                        {source.name} <span className="text-slate-300">(updated {formatTimeAgo(source.updatedAt)})</span>
+                      </p>
+                    ))}
                   </div>
                 )}
               </div>
