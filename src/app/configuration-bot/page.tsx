@@ -3,7 +3,9 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
+import SlackIntegrationBox from '@/components/SlackIntegrationBox';
 import QRCode from 'qrcode';
+import type { SlackChannel } from '@/lib/types/database';
 
 interface BotData {
   id?: string;
@@ -63,6 +65,10 @@ function ConfigurationBotContent() {
   const [linkCopied, setLinkCopied] = useState(false);
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
 
+  // Slack integration state
+  const [slackTeamName, setSlackTeamName] = useState<string | null>(null);
+  const [slackChannels, setSlackChannels] = useState<SlackChannel[]>([]);
+
   // Configuration state
   const [config, setConfig] = useState({
     // Bot Personality
@@ -119,6 +125,11 @@ function ConfigurationBotContent() {
             if (sourcesRes.ok) {
               const sourcesData = await sourcesRes.json();
               setKnowledgeSources(sourcesData.sources || []);
+            }
+            // Load Slack integration data
+            if (bot.slack_team_name) {
+              setSlackTeamName(bot.slack_team_name);
+              setSlackChannels(bot.slack_channels || []);
             }
           }
         } catch (error) {
@@ -690,26 +701,40 @@ function ConfigurationBotContent() {
                 <div className="p-6 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)]">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-medium text-[var(--text-primary)]">Connect Integrations</h3>
-                    <span className="px-2 py-1 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">Coming Soon</span>
                   </div>
                   <p className="text-xs text-[var(--text-muted)] mb-4">Sync knowledge from your existing tools</p>
 
                   {/* Communication & Collaboration */}
-                  <div className="mb-6 opacity-50 pointer-events-none">
+                  <div className="mb-6">
                     <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-3">Communication</p>
                     <div className="grid grid-cols-4 gap-3">
-                      <div className="p-3 rounded-xl border border-[var(--card-border)] bg-gray-50 flex flex-col items-center gap-2 relative">
-                        <div className="absolute top-1 right-1">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                          </svg>
-                        </div>
-                        <div className="w-10 h-10 rounded-lg bg-[#4A154B] flex items-center justify-center">
-                          <span className="text-lg">💬</span>
-                        </div>
-                        <span className="text-xs font-medium text-[var(--text-primary)]">Slack</span>
-                      </div>
-                      <div className="p-3 rounded-xl border border-[var(--card-border)] bg-gray-50 flex flex-col items-center gap-2 relative">
+                      {/* Slack - Interactive */}
+                      {botData?.id && (
+                        <SlackIntegrationBox
+                          botId={botData.id}
+                          slackTeamName={slackTeamName}
+                          slackChannels={slackChannels}
+                          onUpdate={() => {
+                            // Reload bot data to refresh Slack state
+                            fetch(`/api/bots/${botData.id}`)
+                              .then((res) => res.json())
+                              .then((data) => {
+                                if (data.bot) {
+                                  setSlackTeamName(data.bot.slack_team_name || null);
+                                  setSlackChannels(data.bot.slack_channels || []);
+                                  // Also reload knowledge sources
+                                  fetch(`/api/bots/${botData.id}/knowledge`)
+                                    .then((res) => res.json())
+                                    .then((sourcesData) => {
+                                      setKnowledgeSources(sourcesData.sources || []);
+                                    });
+                                }
+                              });
+                          }}
+                        />
+                      )}
+                      {/* Discord - Locked */}
+                      <div className="p-3 rounded-xl border border-[var(--card-border)] bg-gray-50 flex flex-col items-center gap-2 relative opacity-50">
                         <div className="absolute top-1 right-1">
                           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -719,8 +744,10 @@ function ConfigurationBotContent() {
                           <span className="text-lg">🎮</span>
                         </div>
                         <span className="text-xs font-medium text-[var(--text-primary)]">Discord</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">Soon</span>
                       </div>
-                      <div className="p-3 rounded-xl border border-[var(--card-border)] bg-gray-50 flex flex-col items-center gap-2 relative">
+                      {/* MS Teams - Locked */}
+                      <div className="p-3 rounded-xl border border-[var(--card-border)] bg-gray-50 flex flex-col items-center gap-2 relative opacity-50">
                         <div className="absolute top-1 right-1">
                           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -730,8 +757,10 @@ function ConfigurationBotContent() {
                           <span className="text-lg">👥</span>
                         </div>
                         <span className="text-xs font-medium text-[var(--text-primary)]">MS Teams</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">Soon</span>
                       </div>
-                      <div className="p-3 rounded-xl border border-[var(--card-border)] bg-gray-50 flex flex-col items-center gap-2 relative">
+                      {/* Email - Locked */}
+                      <div className="p-3 rounded-xl border border-[var(--card-border)] bg-gray-50 flex flex-col items-center gap-2 relative opacity-50">
                         <div className="absolute top-1 right-1">
                           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -741,6 +770,7 @@ function ConfigurationBotContent() {
                           <span className="text-lg">📧</span>
                         </div>
                         <span className="text-xs font-medium text-[var(--text-primary)]">Email</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">Soon</span>
                       </div>
                     </div>
                   </div>
@@ -1642,12 +1672,15 @@ function DeploySection({
           </div>
 
           {/* Embed Code */}
-          <div className="p-6 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)]">
-            <label className="block text-sm font-medium text-[var(--text-primary)] mb-3">
-              Embed on Website
-            </label>
-            <div className="p-4 rounded-lg bg-[var(--sidebar-bg)] font-mono text-xs text-[var(--text-secondary)] overflow-x-auto">
-              {`<script src="${getShareableLink()}/embed.js"></script>`}
+          <div className="p-6 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] opacity-60">
+            <div className="flex items-center justify-between mb-3">
+              <label className="block text-sm font-medium text-[var(--text-primary)]">
+                Embed on Website
+              </label>
+              <span className="px-2 py-1 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">Coming Soon</span>
+            </div>
+            <div className="p-4 rounded-lg bg-[var(--sidebar-bg)] font-mono text-xs text-[var(--text-muted)] overflow-x-auto select-none pointer-events-none">
+              {`<script src="https://cortexiva.com/embed.js"></script>`}
             </div>
             <p className="text-xs text-[var(--text-muted)] mt-2">
               Add this script to your website to embed the chat widget.

@@ -27,7 +27,7 @@ const features = [
 ];
 
 const integrations = [
-  { name: 'Slack', icon: '💬', color: 'bg-purple-900' },
+  { name: 'Slack', imgSrc: '/slack-logo.png', color: 'bg-white' },
   { name: 'Notion', icon: '📝', color: 'bg-gray-900' },
   { name: 'Confluence', icon: '📘', color: 'bg-blue-900' },
   { name: 'Google Drive', icon: '📁', color: 'bg-blue-500' },
@@ -340,19 +340,23 @@ export default function Homepage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-4 opacity-60">
+          <div className="flex flex-wrap justify-center gap-4">
             {integrations.map((integration) => (
               <div
                 key={integration.name}
-                className="flex items-center gap-3 px-5 py-3 rounded-xl border border-gray-100 bg-white shadow-sm"
+                className={`flex items-center gap-3 px-5 py-3 rounded-xl border border-gray-100 bg-white shadow-sm ${'imgSrc' in integration ? '' : 'opacity-60'}`}
               >
                 <div className={`w-10 h-10 rounded-lg ${integration.color} flex items-center justify-center text-lg`}>
-                  {integration.icon}
+                  {'imgSrc' in integration ? (
+                    <img src={integration.imgSrc} alt={integration.name} className="w-7 h-7" />
+                  ) : (
+                    integration.icon
+                  )}
                 </div>
                 <span className="font-medium text-dark">{integration.name}</span>
               </div>
             ))}
-            <div className="flex items-center gap-3 px-5 py-3 rounded-xl border border-dashed border-gray-300 text-gray-400">
+            <div className="flex items-center gap-3 px-5 py-3 rounded-xl border border-dashed border-gray-300 text-gray-400 opacity-60">
               <span className="text-lg">+</span>
               <span className="font-medium">16 more</span>
             </div>

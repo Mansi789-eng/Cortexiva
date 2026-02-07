@@ -46,6 +46,10 @@ export interface Database {
           status: 'draft' | 'active' | 'paused';
           created_at: string;
           updated_at: string;
+          slack_team_id: string | null;
+          slack_team_name: string | null;
+          slack_access_token: string | null;
+          slack_channels: SlackChannel[];
         };
         Insert: {
           id?: string;
@@ -57,6 +61,10 @@ export interface Database {
           status?: 'draft' | 'active' | 'paused';
           created_at?: string;
           updated_at?: string;
+          slack_team_id?: string | null;
+          slack_team_name?: string | null;
+          slack_access_token?: string | null;
+          slack_channels?: SlackChannel[];
         };
         Update: {
           id?: string;
@@ -68,13 +76,17 @@ export interface Database {
           status?: 'draft' | 'active' | 'paused';
           created_at?: string;
           updated_at?: string;
+          slack_team_id?: string | null;
+          slack_team_name?: string | null;
+          slack_access_token?: string | null;
+          slack_channels?: SlackChannel[];
         };
       };
       knowledge_sources: {
         Row: {
           id: string;
           bot_id: string;
-          type: 'file' | 'url' | 'text';
+          type: 'file' | 'url' | 'text' | 'slack';
           name: string;
           file_path: string | null;
           url: string | null;
@@ -88,7 +100,7 @@ export interface Database {
         Insert: {
           id?: string;
           bot_id: string;
-          type: 'file' | 'url' | 'text';
+          type: 'file' | 'url' | 'text' | 'slack';
           name: string;
           file_path?: string | null;
           url?: string | null;
@@ -102,7 +114,7 @@ export interface Database {
         Update: {
           id?: string;
           bot_id?: string;
-          type?: 'file' | 'url' | 'text';
+          type?: 'file' | 'url' | 'text' | 'slack';
           name?: string;
           file_path?: string | null;
           url?: string | null;
@@ -205,6 +217,14 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
   sources?: SourceInfo[];
+}
+
+// Slack channel type
+export interface SlackChannel {
+  id: string;
+  name: string;
+  synced_at: string | null;
+  message_count: number;
 }
 
 // Default bot config

@@ -14,12 +14,17 @@ interface BotData {
   };
 }
 
+interface SourceInfo {
+  name: string;
+  updatedAt: string;
+}
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  sources?: string[];
+  sources?: SourceInfo[];
 }
 
 const departments: Record<string, { name: string; icon: string }> = {
@@ -275,7 +280,7 @@ function TestBotContent() {
                 {message.sources && message.sources.length > 0 && (
                   <div className="mt-2 pt-2 border-t border-[var(--card-border)]">
                     <p className="text-xs text-[var(--text-muted)]">
-                      Sources: {message.sources.join(', ')}
+                      Sources: {message.sources.map(s => s.name).join(', ')}
                     </p>
                   </div>
                 )}
