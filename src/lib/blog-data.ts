@@ -12,6 +12,109 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: "slack-integration-now-live",
+    title: "New: Import Slack Channels as Knowledge for Your Bot",
+    excerpt:
+      "Turn your Slack conversations into searchable knowledge. Connect your workspace, select channels, and let your bot learn from real team discussions.",
+    content: `
+## Slack Integration is Here
+
+We're excited to announce that Cortexiva now integrates directly with Slack. Your team's conversations, decisions, and tribal knowledge no longer have to disappear into the void of endless message threads.
+
+With our new Slack integration, you can connect your workspace and import channel messages as knowledge sources for your bot. This means your AI assistant can now answer questions based on real discussions your team has had.
+
+## Why Slack Conversations Matter
+
+Think about how much valuable information lives in your Slack channels:
+
+- **Decisions and context**: "Why did we choose this approach?" is often answered in a thread from 6 months ago
+- **Troubleshooting history**: Common problems and their solutions discussed in real-time
+- **Tribal knowledge**: The tips and tricks your senior team members share daily
+- **Process clarifications**: "How do we handle X?" answered dozens of times
+
+All of this knowledge typically gets lost as messages scroll out of view. Now it becomes part of your bot's permanent memory.
+
+## How It Works
+
+Getting started is simple:
+
+### 1. Connect Your Workspace
+
+Click the Slack integration box in your bot configuration. You'll be redirected to Slack's OAuth flow to authorize Cortexiva. We only request the permissions we need to read channel messages—nothing more.
+
+### 2. Select Channels to Import
+
+Once connected, you'll see a list of public channels in your workspace. Check the ones you want to import as knowledge sources. You might start with:
+
+- Your #general or #announcements channel for company-wide context
+- Team-specific channels like #engineering or #product
+- Support channels where common questions get answered
+- Onboarding channels with helpful information for new hires
+
+### 3. Sync and Done
+
+Click "Sync Selected Channels" and we'll import the message history. The messages are processed through our RAG pipeline and become queryable knowledge for your bot.
+
+## Features
+
+### Re-sync Anytime
+
+Slack conversations are ongoing. Hit the re-sync button on any channel to pull in the latest messages. Keep your bot's knowledge fresh with conversations from the past week or month.
+
+### Desync Channels
+
+Changed your mind about a channel? Desync it with one click. The messages from that channel will be removed from your bot's knowledge base.
+
+### Message Counts
+
+See at a glance how many messages have been imported from each channel. This helps you understand the depth of knowledge your bot has from different sources.
+
+### Privacy First
+
+We only access channels you explicitly select. Private channels and DMs are never accessed. Your Slack data stays within your control.
+
+## EU Data Residency
+
+Like all Cortexiva features, Slack data is processed and stored in the EU:
+
+- **Supabase**: Frankfurt, Germany (eu-central-1)
+- **AI Processing**: Google Cloud Netherlands (europe-west4)
+- **Application**: Vercel Amsterdam
+
+Your team's Slack messages never leave European infrastructure.
+
+## Getting Started
+
+If you're already a Cortexiva user:
+
+1. Go to your bot configuration page
+2. Find the Slack box in the Integrations section
+3. Click to connect and authorize
+4. Select your channels and sync
+
+New to Cortexiva? [Sign up free](/signup) and connect Slack as one of your first knowledge sources.
+
+## What's Next
+
+This is just the beginning of our Slack integration. Coming soon:
+
+- **Automatic sync**: Keep channels updated without manual re-syncs
+- **Thread awareness**: Better handling of threaded conversations
+- **Slack bot responses**: Ask your Cortexiva bot directly in Slack
+
+We're building the knowledge platform that meets your team where they already work. Slack integration is a major step in that direction.
+
+---
+
+Have questions about the Slack integration? [Reach out to us](mailto:support@cortexiva.com) or try it yourself—it takes less than 2 minutes to connect.
+    `,
+    author: "Cortexiva Team",
+    publishedAt: "2025-02-07",
+    readingTime: "4 min read",
+    tags: ["product-update", "slack", "integrations", "knowledge-management"],
+    featured: true,
+  },
+  {
     slug: "why-knowledge-bots-are-the-future",
     title: "Why Knowledge Bots Are the Future of Team Productivity",
     excerpt:
