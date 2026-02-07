@@ -106,7 +106,7 @@ We're building the knowledge platform that meets your team where they already wo
 
 ---
 
-Have questions about the Slack integration? [Reach out to us](mailto:support@cortexiva.com) or try it yourself—it takes less than 2 minutes to connect.
+Ready to try it? [Sign up free](/signup) and connect Slack in less than 2 minutes.
     `,
     author: "Cortexiva Team",
     publishedAt: "2025-02-07",
